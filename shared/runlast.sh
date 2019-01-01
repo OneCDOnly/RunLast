@@ -7,7 +7,7 @@
 # For more info: [https://forum.qnap.com/viewtopic.php?f=xxx&t=xxxxxx]
 #
 # Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/xxx]
-# Project source: [https://github.com/OneCDOnly/xxxxxxxxxx]
+# Project source: [https://github.com/OneCDOnly/RunLast]
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
