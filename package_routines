@@ -111,6 +111,6 @@ export package_status=REMOVE
 # the package is installed.
 ######################################################################
 pkg_pre_install()
-	{
-	export package_status=INSTALLING
-	}
+    {
+    export package_status=INSTALLING
+    }

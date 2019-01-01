@@ -50,12 +50,12 @@ ProcessScripts()
 
     [[ $exitcode -gt 0 ]] && return
 
-	for i in ${SCRIPT_STORE_PATH}/*; do
-		if [[ -x $i ]]; then
-			echo "[$(date)] $i" >> "$TEMP_LOG_PATHFILE"
-			$i 2>&1 >> "$TEMP_LOG_PATHFILE"
-		fi
-	done
+    for i in ${SCRIPT_STORE_PATH}/*; do
+        if [[ -x $i ]]; then
+            echo "[$(date)] $i" >> "$TEMP_LOG_PATHFILE"
+            $i 2>&1 >> "$TEMP_LOG_PATHFILE"
+        fi
+    done
 
     }
 
@@ -181,31 +181,31 @@ Init
 
 case "$1" in
     start)
-		if [[ $package_status = INSTALLING ]]; then
-			RecordOperationRequest "installation"
-			RecordOperationComplete "installation"
-		else
-			RecordOperationRequest "script processing"
-			ProcessScripts
-			RecordOperationComplete "script processing"
-		fi
-		CommitGUILog
+        if [[ $package_status = INSTALLING ]]; then
+            RecordOperationRequest "installation"
+            RecordOperationComplete "installation"
+        else
+            RecordOperationRequest "script processing"
+            ProcessScripts
+            RecordOperationComplete "script processing"
+        fi
+        CommitGUILog
         ;;
     stop)
-		if [[ $package_status != REMOVE ]]; then
-			if (IsQPKGEnabled SortMyQPKGs); then
-				if [[ $(getcfg SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
-					WriteQTSLog "SortMyQPKGs will be used to reorder this package" 1
-				else
-					WriteQTSLog "SortMyQPKGs version is incompatible with this package" 2
-				fi
-			else
-				RecordOperationRequest "package shuffle"
-				SendToEnd $THIS_QPKG_NAME
-				RecordOperationComplete "package shuffle"
-				CommitGUILog
-			fi
-		fi
+        if [[ $package_status != REMOVE ]]; then
+            if (IsQPKGEnabled SortMyQPKGs); then
+                if [[ $(getcfg SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
+                    WriteQTSLog "SortMyQPKGs will be used to reorder this package" 1
+                else
+                    WriteQTSLog "SortMyQPKGs version is incompatible with this package" 2
+                fi
+            else
+                RecordOperationRequest "package shuffle"
+                SendToEnd $THIS_QPKG_NAME
+                RecordOperationComplete "package shuffle"
+                CommitGUILog
+            fi
+        fi
         ;;
     *)
         # do nothing
