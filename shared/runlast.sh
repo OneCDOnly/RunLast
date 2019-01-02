@@ -104,7 +104,7 @@ TrimGUILog()
 
     }
 
-RecordOperationRequest()
+RecordRequest()
     {
 
     # $1 = operation
@@ -120,7 +120,7 @@ RecordOperationRequest()
 
     }
 
-RecordOperationComplete()
+RecordComplete()
     {
 
     # $1 = operation
@@ -130,6 +130,32 @@ RecordOperationComplete()
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "'$1' completed" 0
+
+    }
+
+RecordWarning()
+    {
+
+    # $1 = message
+
+    local buffer="\n[$(date)] '$1'"
+
+    echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
+
+    WriteQTSLog "'$1'" 1
+
+    }
+
+RecordError()
+    {
+
+    # $1 = message
+
+    local buffer="\n[$(date)] '$1'"
+
+    echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
+
+    WriteQTSLog "'$1'" 2
 
     }
 
@@ -182,29 +208,31 @@ Init
 case "$1" in
     start)
         if [[ $package_status = INSTALLING ]]; then
-            RecordOperationRequest "installation"
-            RecordOperationComplete "installation"
+            operation='installation'
+            RecordRequest "$operation"
         else
-            RecordOperationRequest "script processing"
+            operation='script processing'
+            RecordRequest "$operation"
             ProcessScripts
-            RecordOperationComplete "script processing"
         fi
+        RecordComplete "$operation"
         CommitGUILog
         ;;
     stop)
         if [[ $package_status != REMOVE ]]; then
             if (IsQPKGEnabled SortMyQPKGs); then
                 if [[ $(getcfg SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
-                    WriteQTSLog "SortMyQPKGs will be used to reorder this package" 1
+                    RecordWarning "SortMyQPKGs will be used to reorder this package"
                 else
-                    WriteQTSLog "SortMyQPKGs version is incompatible with this package" 2
+                    RecordError "SortMyQPKGs version is incompatible with this package"
                 fi
             else
-                RecordOperationRequest "package shuffle"
+                operation='package shuffle'
+                RecordRequest "$operation"
                 SendToEnd $THIS_QPKG_NAME
-                RecordOperationComplete "package shuffle"
-                CommitGUILog
+                RecordComplete "$operation"
             fi
+            CommitGUILog
         fi
         ;;
     *)
