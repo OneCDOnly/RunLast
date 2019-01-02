@@ -104,7 +104,7 @@ TrimGUILog()
 
     }
 
-RecordRequest()
+RecordStart()
     {
 
     # $1 = operation
@@ -209,10 +209,10 @@ case "$1" in
     start)
         if [[ $package_status = INSTALLING ]]; then
             operation='installation'
-            RecordRequest "$operation"
+            RecordStart "$operation"
         else
             operation='script processing'
-            RecordRequest "$operation"
+            RecordStart "$operation"
             ProcessScripts
         fi
         RecordComplete "$operation"
@@ -220,6 +220,8 @@ case "$1" in
         ;;
     stop)
         if [[ $package_status != REMOVE ]]; then
+            operation='package shuffle'
+            RecordStart "$operation"
             if (IsQPKGEnabled SortMyQPKGs); then
                 if [[ $(getcfg SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
                     RecordWarning "SortMyQPKGs will be used to reorder this package"
@@ -227,11 +229,9 @@ case "$1" in
                     RecordError "SortMyQPKGs version is incompatible with this package"
                 fi
             else
-                operation='package shuffle'
-                RecordRequest "$operation"
                 SendToEnd $THIS_QPKG_NAME
-                RecordComplete "$operation"
             fi
+            RecordComplete "$operation"
             CommitGUILog
         fi
         ;;
