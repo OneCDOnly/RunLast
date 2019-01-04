@@ -104,7 +104,9 @@
 # the package is removed.
 ######################################################################
 PKG_PRE_REMOVE="{
+
 export package_status=REMOVE
+
 }"
 ######################################################################
 # Define any package specific operations that shall be performed when
@@ -112,5 +114,14 @@ export package_status=REMOVE
 ######################################################################
 pkg_pre_install()
     {
+
     export package_status=INSTALLING
+
+    }
+
+pkg_post_install()
+    {
+
+    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Web_Port $($CMD_GETCFG System "Web Access Port")
+
     }

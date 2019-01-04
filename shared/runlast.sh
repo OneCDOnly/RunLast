@@ -33,10 +33,10 @@ Init()
     [[ ! -e $CONFIG_PATHFILE ]] && { echo "file not found [$CONFIG_PATHFILE]"; exit 1 ;}
 
     local QPKG_PATH=$(getcfg $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
-    REAL_LOG_PATHFILE=${QPKG_PATH}/${THIS_QPKG_NAME}.log
-    TEMP_LOG_PATHFILE=${REAL_LOG_PATHFILE}.tmp
-    GUI_LOG_PATHFILE=/home/httpd/${THIS_QPKG_NAME}.log
-    SCRIPT_STORE_PATH=${QPKG_PATH}/scripts
+    REAL_LOG_PATHFILE="${QPKG_PATH}/${THIS_QPKG_NAME}.log"
+    TEMP_LOG_PATHFILE="${REAL_LOG_PATHFILE}.tmp"
+    GUI_LOG_PATHFILE="/home/httpd/${THIS_QPKG_NAME}.log"
+    SCRIPT_STORE_PATH="${QPKG_PATH}/scripts"
 
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
@@ -117,6 +117,7 @@ RecordStart()
     echo -e "${temp// /─}\n$THIS_QPKG_NAME ($build)\n$buffer\n" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "'$1' started" 0
+    echo "'$1' started"
 
     }
 
@@ -130,6 +131,7 @@ RecordComplete()
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "'$1' completed" 0
+    echo "'$1' completed"
 
     }
 
@@ -143,6 +145,7 @@ RecordWarning()
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "'$1'" 1
+    echo "'$1'"
 
     }
 
@@ -156,6 +159,7 @@ RecordError()
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "'$1'" 2
+    echo "'$1'"
 
     }
 
