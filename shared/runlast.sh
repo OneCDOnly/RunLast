@@ -33,10 +33,12 @@ Init()
     [[ ! -e $CONFIG_PATHFILE ]] && { echo "file not found [$CONFIG_PATHFILE]"; exit 1 ;}
 
     local QPKG_PATH=$(getcfg $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
-    REAL_LOG_PATHFILE="${QPKG_PATH}/${THIS_QPKG_NAME}.log"
-    TEMP_LOG_PATHFILE="${REAL_LOG_PATHFILE}.tmp"
-    GUI_LOG_PATHFILE="/home/httpd/${THIS_QPKG_NAME}.log"
-    SCRIPT_STORE_PATH="${QPKG_PATH}/scripts"
+    REAL_LOG_PATHFILE=${QPKG_PATH}/${THIS_QPKG_NAME}.log
+    TEMP_LOG_PATHFILE=${REAL_LOG_PATHFILE}.tmp
+    GUI_LOG_PATHFILE=/home/httpd/${THIS_QPKG_NAME}.log
+    SCRIPT_STORE_PATH=${QPKG_PATH}/scripts
+    BUILD=$(getcfg $THIS_QPKG_NAME Build -f $CONFIG_PATHFILE)
+    echo "$THIS_QPKG_NAME ($BUILD)"
 
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
@@ -50,10 +52,14 @@ ProcessScripts()
 
     [[ $exitcode -gt 0 ]] && return
 
+    echo >> "$TEMP_LOG_PATHFILE"
     for i in ${SCRIPT_STORE_PATH}/*; do
+        local op="executing '$i' ..."
         if [[ -x $i ]]; then
-            echo "[$(date)] $i" >> "$TEMP_LOG_PATHFILE"
-            $i 2>&1 >> "$TEMP_LOG_PATHFILE"
+            echo "[$(date)] $op" >> "$TEMP_LOG_PATHFILE"
+            echo "$op"
+            output=$($i 2>&1)
+            echo "$output" | tee -a "$TEMP_LOG_PATHFILE"
         fi
     done
 
@@ -109,15 +115,15 @@ RecordStart()
 
     # $1 = operation
 
-    local buffer="[$(date)] '$1' started"
+    local op="$1 started"
+    local buffer="[$(date)] $op"
     local length=${#buffer}
     local temp=$(printf "%${length}s")
-    local build=$(getcfg $THIS_QPKG_NAME Build -f $CONFIG_PATHFILE)
 
-    echo -e "${temp// /─}\n$THIS_QPKG_NAME ($build)\n$buffer\n" >> "$TEMP_LOG_PATHFILE"
+    echo -e "${temp// /─}\n$THIS_QPKG_NAME ($BUILD)\n$buffer" >> "$TEMP_LOG_PATHFILE"
 
-    WriteQTSLog "'$1' started" 0
-    echo "'$1' started"
+    WriteQTSLog "$op" 0
+    echo "$op"
 
     }
 
@@ -126,12 +132,13 @@ RecordComplete()
 
     # $1 = operation
 
-    local buffer="\n[$(date)] '$1' completed"
+    local op="$1 completed"
+    local buffer="\n[$(date)] $op"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
-    WriteQTSLog "'$1' completed" 0
-    echo "'$1' completed"
+    WriteQTSLog "$op" 0
+    echo "$op"
 
     }
 
@@ -140,12 +147,12 @@ RecordWarning()
 
     # $1 = message
 
-    local buffer="\n[$(date)] '$1'"
+    local buffer="\n[$(date)] $1"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
-    WriteQTSLog "'$1'" 1
-    echo "'$1'"
+    WriteQTSLog "$1" 1
+    echo "$1"
 
     }
 
@@ -154,12 +161,12 @@ RecordError()
 
     # $1 = message
 
-    local buffer="\n[$(date)] '$1'"
+    local buffer="\n[$(date)] $1"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
-    WriteQTSLog "'$1'" 2
-    echo "'$1'"
+    WriteQTSLog "$1" 2
+    echo "$1"
 
     }
 
@@ -228,9 +235,9 @@ case "$1" in
             RecordStart "$operation"
             if (IsQPKGEnabled SortMyQPKGs); then
                 if [[ $(getcfg SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
-                    RecordWarning "SortMyQPKGs will be used to reorder this package"
+                    RecordWarning "SortMyQPKGs will reorder this package"
                 else
-                    RecordError "SortMyQPKGs version is incompatible with this package"
+                    RecordError "your SortMyQPKGs version is incompatible with this package"
                 fi
             else
                 SendToEnd $THIS_QPKG_NAME
@@ -240,8 +247,8 @@ case "$1" in
         fi
         ;;
     *)
-        # do nothing
-        sleep 1
+        echo "use '$0 start' to begin processing scripts path"
+        echo "use '$0 stop' to ensure this package is run last during bootup"
         ;;
 esac
 

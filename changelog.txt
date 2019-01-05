@@ -1,2 +1,5 @@
+* Minor update: (190106)
+- Tidy-up a few logged and interactive display messages.
+
 * Initial release: (190101)
 - First public script release.
