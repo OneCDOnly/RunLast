@@ -4,9 +4,9 @@
 #
 # This script is part of the 'RunLast' package
 #
-# For more info: [https://forum.qnap.com/viewtopic.php?f=xxx&t=xxxxxx]
+# For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=145975]
 #
-# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/xxx]
+# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/690]
 # Project source: [https://github.com/OneCDOnly/RunLast]
 #
 # This program is free software: you can redistribute it and/or modify it under

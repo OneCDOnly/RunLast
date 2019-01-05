@@ -2,12 +2,12 @@
 
 ## Description
 
-**RunLast** creates an enviroment to run commands or shell-scripts after QPKG re-integration during QTS NAS bootup.
+**RunLast** creates an environment to run commands or shell-scripts after QPKG re-integration during QTS NAS bootup.
 
 
 ## How to install
 
-- It's available in the [Qnapclub Store!](https://qnapclub.eu/en/qpkg/508)
+- It's available in the [Qnapclub Store!](https://qnapclub.eu/en/qpkg/690)
 
 - [Click here](https://qnapclub.eu/en/howto/1) to learn how to add the **Qnapclub Store** as an App Center repository in QTS.
 
