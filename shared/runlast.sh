@@ -54,12 +54,19 @@ ProcessScripts()
 
     echo >> "$TEMP_LOG_PATHFILE"
     for i in ${SCRIPT_STORE_PATH}/*; do
-        local op="executing '$i' ..."
         if [[ -x $i ]]; then
+            local op="executing '$i':"
             echo "[$(date)] $op" >> "$TEMP_LOG_PATHFILE"
             echo "$op"
-            output=$($i 2>&1)
-            echo "$output" | tee -a "$TEMP_LOG_PATHFILE"
+
+            {   # https://unix.stackexchange.com/a/430182/110015
+                stdout=$(eval $op 2> /dev/fd/3)
+                exitcode=$?
+                stderr=$(cat<&3)
+            } 3<<EOF
+            EOF
+
+            echo -e "exitcode=[$exitcode]\nstdout=[$stdout]\nstderr=[$stderr]" | tee -a "$TEMP_LOG_PATHFILE"
         fi
     done
 
