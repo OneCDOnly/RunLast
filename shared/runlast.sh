@@ -103,8 +103,7 @@ RunAndLog()
 
     [[ -z $1 ]] && return 1
 
-    echo >> "$TEMP_LOG_PATHFILE"
-    echo "[$(date)] executing $1:" | tee -a "$TEMP_LOG_PATHFILE"
+    echo "[$(date)] executing: \"$1\" ..." | tee -a "$TEMP_LOG_PATHFILE"
 
     {   # https://unix.stackexchange.com/a/430182/110015
         stdout=$(eval "$1" 2> /dev/fd/3)
@@ -113,7 +112,7 @@ RunAndLog()
     } 3<<EOF
 EOF
 
-    echo -e "returncode=[$returncode]\nstdout=[$stdout]\nstderr=[$stderr]" | tee -a "$TEMP_LOG_PATHFILE"
+    echo -e "[$(date)] returncode: ($returncode)\n[$(date)] stdout: \"$stdout\"\n[$(date)] stderr: \"$stderr\"" | tee -a "$TEMP_LOG_PATHFILE"
 
     return 0
 
@@ -180,7 +179,7 @@ RecordStart()
     echo -e "${temp// /─}\n$THIS_QPKG_NAME ($BUILD)\n$buffer" > "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "$op" 0
-    echo "$op"
+    echo "$buffer"
 
     }
 
@@ -190,12 +189,12 @@ RecordComplete()
     # $1 = operation
 
     local op="$1 completed"
-    local buffer="\n[$(date)] $op"
+    local buffer="[$(date)] $op"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "$op" 0
-    echo "$op"
+    echo "$buffer"
     CommitGUILog
 
     }
