@@ -8,7 +8,14 @@ This allows you to run scripts dependent on QPKGs during QTS startup.
 
 ## What it does
 
-This package creates a scripts directory in the package installation path. Your scripts must be placed here. When this QPKG starts, it processes each script, storing any stdout and stderr to a log, viewable via the QTS UI.
+This package creates two scripts directories in the package installation path:
+- `init.d`
+- `scripts`
+
+Place SysV-style scripts in `init.d` directory. These will be executed with `start` parameter after NAS startup, and with `stop` parameter before NAS shutdown.
+Scripts in `scripts` directory will be executed only during startup, and always after the custom `init.d` start script execution.
+
+During script execution, stdout and stderr are stored into a log file, which is viewable via the QTS UI.
 
 ## How to install
 
