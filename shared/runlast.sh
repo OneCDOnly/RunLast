@@ -103,7 +103,7 @@ RunAndLog()
 
     [[ -z $1 ]] && return 1
 
-    echo "[$(date)] executing: \"$1\" ..." | tee -a "$TEMP_LOG_PATHFILE"
+    echo "[$(date)] -> executing: \"$1\" ..." | tee -a "$TEMP_LOG_PATHFILE"
 
     {   # https://unix.stackexchange.com/a/430182/110015
         stdout=$(eval "$1" 2> /dev/fd/3)
@@ -112,7 +112,7 @@ RunAndLog()
     } 3<<EOF
 EOF
 
-    echo -e "[$(date)] returncode: ($returncode)\n[$(date)] stdout: \"$stdout\"\n[$(date)] stderr: \"$stderr\"" | tee -a "$TEMP_LOG_PATHFILE"
+    echo -e "[$(date)] => returncode: ($returncode)\n[$(date)] => stdout: \"$stdout\"\n[$(date)] => stderr: \"$stderr\"" | tee -a "$TEMP_LOG_PATHFILE"
 
     return 0
 
@@ -171,7 +171,7 @@ RecordStart()
 
     # $1 = operation
 
-    local op="$1 started"
+    local op="begin $1 ..."
     local buffer="[$(date)] $op"
     local length=${#buffer}
     local temp=$(printf "%${length}s")
@@ -188,7 +188,7 @@ RecordComplete()
 
     # $1 = operation
 
-    local op="$1 completed"
+    local op="end $1"
     local buffer="[$(date)] $op"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
@@ -199,17 +199,31 @@ RecordComplete()
 
     }
 
+RecordInfo()
+    {
+
+    # $1 = message
+
+    local buffer="[$(date)] $1"
+
+    echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
+
+    WriteQTSLog "$1" 0
+    echo "$buffer"
+
+    }
+
 RecordWarning()
     {
 
     # $1 = message
 
-    local buffer="\n[$(date)] $1"
+    local buffer="[$(date)] $1"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "$1" 1
-    echo "$1"
+    echo "$buffer"
 
     }
 
@@ -218,12 +232,12 @@ RecordError()
 
     # $1 = message
 
-    local buffer="\n[$(date)] $1"
+    local buffer="[$(date)] $1"
 
     echo -e "$buffer" >> "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "$1" 2
-    echo "$1"
+    echo "$buffer"
 
     }
 
@@ -276,7 +290,7 @@ case "$1" in
             operation='installation'
             RecordStart "$operation"
         else
-            operation='script processing'
+            operation='"start" scripts'
             RecordStart "$operation"
             ProcessSysV start
             ProcessScripts
@@ -285,20 +299,20 @@ case "$1" in
         ;;
     stop)
         if [[ $package_status != REMOVE ]]; then
-            operation='package shuffle'
+            operation='package reorder'
             RecordStart "$operation"
             if IsQPKGEnabled SortMyQPKGs; then
                 if [[ $($GETCFG_CMD SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
-                    RecordWarning "SortMyQPKGs will reorder this package"
+                    RecordInfo "SortMyQPKGs will reorder this package"
                 else
-                    RecordError "your SortMyQPKGs version is incompatible with this package"
+                    RecordWarning "your SortMyQPKGs version is incompatible with this package"
                 fi
             else
                 SendToEnd $THIS_QPKG_NAME
             fi
             RecordComplete "$operation"
         fi
-        operation='script processing'
+        operation='"stop" scripts'
         RecordStart "$operation"
         ProcessSysV stop
         RecordComplete "$operation"

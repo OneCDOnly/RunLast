@@ -1,5 +1,15 @@
+* Minor update: (201104)
+- downgrade logged warning when sorting QPKG order,
+- include 'start' and 'stop' operations in logs.
+
+* Minor update: (201101)
+- improve log format.
+
+* Minor update: (201029)
+- add support for SysV-style init scripts.
+
 * Minor update: (190106)
-- Tidy-up a few logged and interactive display messages.
+- tidy-up a few logged and interactive display messages.
 
 * Initial release: (190101)
-- First public script release.
+- first public script release.
