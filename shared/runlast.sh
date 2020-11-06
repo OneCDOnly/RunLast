@@ -39,6 +39,7 @@ Init()
     local -r QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
     readonly REAL_LOG_PATHFILE=$QPKG_PATH/$THIS_QPKG_NAME.log
     readonly TEMP_LOG_PATHFILE=$REAL_LOG_PATHFILE.tmp
+    readonly LINK_LOG_PATHFILE=/var/log/$THIS_QPKG_NAME.log
     local -r GUI_LOG_PATHFILE=/home/httpd/$THIS_QPKG_NAME.log
     readonly SYSV_STORE_PATH=$QPKG_PATH/init.d
     readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
@@ -50,6 +51,7 @@ Init()
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
     [[ ! -L $GUI_LOG_PATHFILE ]] && ln -s "$REAL_LOG_PATHFILE" "$GUI_LOG_PATHFILE"
+    [[ ! -L $LINK_LOG_PATHFILE ]] && ln -s "$REAL_LOG_PATHFILE" "$LINK_LOG_PATHFILE"
     [[ ! -d $SYSV_STORE_PATH ]] && mkdir -p "$SYSV_STORE_PATH"
     [[ ! -d $SCRIPT_STORE_PATH ]] && mkdir -p "$SCRIPT_STORE_PATH"
 
@@ -67,13 +69,13 @@ ProcessSysV()
     case $1 in
         start)
             # execute 'init.d' script names in-order
-            ls "$SYSV_STORE_PATH"/* 2>/dev/null | while read script_pathname; do
+            ls "$SYSV_STORE_PATH"/* 2>/dev/null | while read -r script_pathname; do
                 [[ -x $script_pathname ]] && RunAndLog "'$script_pathname' start"
             done
             ;;
         stop)
             # execute 'init.d' script names in reverse-order
-            ls -r "$SYSV_STORE_PATH"/* 2>/dev/null | while read script_pathname; do
+            ls -r "$SYSV_STORE_PATH"/* 2>/dev/null | while read -r script_pathname; do
                 [[ -x $script_pathname ]] && RunAndLog "'$script_pathname' stop"
             done
             ;;
@@ -90,7 +92,7 @@ ProcessScripts()
     local script_pathname=''
 
     # read 'scripts' script names in order and execute
-    ls "$SCRIPT_STORE_PATH"/* 2>/dev/null | while read script_pathname; do
+    ls "$SCRIPT_STORE_PATH"/* 2>/dev/null | while read -r script_pathname; do
         [[ -x $script_pathname ]] && RunAndLog "'$script_pathname'"
     done
 
@@ -101,18 +103,21 @@ RunAndLog()
 
     # $1 = command to run
 
-    [[ -z $1 ]] && return 1
+    if [[ -z $1 ]]; then
+        echo "command not specified"
+        return 1
+    fi
 
-    echo "[$(date)] -> executing: \"$1\" ..." | tee -a "$TEMP_LOG_PATHFILE"
+    echo "[$(date)] -> execute: \"$1\" ..." | tee -a "$TEMP_LOG_PATHFILE"
 
     {   # https://unix.stackexchange.com/a/430182/110015
         stdout=$(eval "$1" 2> /dev/fd/3)
-        returncode=$?
+        exitcode=$?
         stderr=$(cat<&3)
     } 3<<EOF
 EOF
 
-    echo -e "[$(date)] => returncode: ($returncode)\n[$(date)] => stdout: \"$stdout\"\n[$(date)] => stderr: \"$stderr\"" | tee -a "$TEMP_LOG_PATHFILE"
+    echo -e "[$(date)] => exitcode: ($exitcode)\n[$(date)] => stdout: \"$stdout\"\n[$(date)] => stderr: \"$stderr\"" | tee -a "$TEMP_LOG_PATHFILE"
 
     return 0
 
@@ -124,6 +129,7 @@ SendToEnd()
     # sends $1 to the end of qpkg.conf
 
     local buffer=$(ShowDataBlock "$1")
+
     if [[ $? -gt 0 ]]; then
         echo "error - ${buffer}!"
         return 2
@@ -139,8 +145,15 @@ ShowDataBlock()
 
     # returns the data block for the QPKG name specified as $1
 
-    [[ -z $1 ]] && { echo "QPKG not specified"; return 1 ;}
-    ! (grep -q "$1" $CONFIG_PATHFILE) && { echo "QPKG not found"; return 2 ;}
+    if [[ -z $1 ]]; then
+        echo "QPKG not specified"
+        return 1
+    fi
+
+    if ! grep -q "$1" $CONFIG_PATHFILE; then
+        echo "QPKG not found"
+        return 2
+    fi
 
     sl=$(grep -n "^\[$1\]" "$CONFIG_PATHFILE" | cut -f1 -d':')
     ll=$(wc -l < "$CONFIG_PATHFILE" | tr -d ' ')

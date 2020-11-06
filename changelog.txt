@@ -1,3 +1,7 @@
+* Minor update: (201106)
+- a few wording and formatting changes for accuracy, and to keep ShellCheck happy.
+- include a link to logfile in [/var/log/]
+
 * Minor update: (201104)
 - downgrade logged warning when sorting QPKG order,
 - include 'start' and 'stop' operations in logs.
@@ -6,7 +10,7 @@
 - improve log format.
 
 * Minor update: (201029)
-- add support for SysV-style init scripts.
+- add support for SysV-style init scripts. Thank you @mickroll for this great suggestion!
 
 * Minor update: (190106)
 - tidy-up a few logged and interactive display messages.
