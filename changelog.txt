@@ -1,3 +1,6 @@
+* Minor update: (201119)
+- ensure symlink to /dev/fd is created so stderr can be captured separately from stdout.
+
 * Minor update: (201106)
 - a few wording and formatting changes for accuracy, and to keep ShellCheck happy.
 - include a link to logfile in [/var/log/]

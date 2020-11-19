@@ -34,6 +34,8 @@ Init()
         exit 1
     fi
 
+    [[ ! -e /dev/fd ]] && ln -s /proc/self/fd /dev/fd   # sometimes, '/dev/fd' isn't created by QTS. Don't know why.
+
     readonly GETCFG_CMD=/sbin/getcfg
     readonly RMCFG_CMD=/sbin/rmcfg
     local -r QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
