@@ -38,6 +38,8 @@ Init()
 
     readonly GETCFG_CMD=/sbin/getcfg
     readonly RMCFG_CMD=/sbin/rmcfg
+    readonly SETCFG_CMD=/sbin/setcfg
+    readonly APP_CENTER_NOTIFIER=/sbin/qpkg_cli     # only needed for QTS 4.5.1-and-later
     local -r QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
     readonly REAL_LOG_PATHFILE=$QPKG_PATH/$THIS_QPKG_NAME.log
     readonly TEMP_LOG_PATHFILE=$REAL_LOG_PATHFILE.tmp
@@ -47,6 +49,11 @@ Init()
     readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
     readonly BUILD=$($GETCFG_CMD $THIS_QPKG_NAME Build -f $CONFIG_PATHFILE)
     readonly LC_ALL=C
+
+    $SETCFG_CMD "$THIS_QPKG_NAME" Status complete -f "$CONFIG_PATHFILE"
+
+    # KLUDGE: force-cancel QTS 4.5.1 App Center notifier status as it's often wrong. :(
+    [[ -e $APP_CENTER_NOTIFIER ]] && $APP_CENTER_NOTIFIER -c "$THIS_QPKG_NAME" > /dev/null 2>&1
 
     echo "$THIS_QPKG_NAME ($BUILD)"
 
@@ -313,7 +320,7 @@ case "$1" in
         RecordComplete "$operation"
         ;;
     stop)
-        if [[ $package_status != REMOVE ]]; then
+        if [[ $package_status != REMOVING ]]; then
             operation='package reorder'
             RecordStart "$operation"
             if IsQPKGEnabled SortMyQPKGs; then
@@ -326,11 +333,12 @@ case "$1" in
                 SendToEnd $THIS_QPKG_NAME
             fi
             RecordComplete "$operation"
+
+            operation='"stop" scripts'
+            RecordStart "$operation"
+            ProcessSysV stop
+            RecordComplete "$operation"
         fi
-        operation='"stop" scripts'
-        RecordStart "$operation"
-        ProcessSysV stop
-        RecordComplete "$operation"
         ;;
     *)
         echo "use '$0 start' to execute files in the 'init.d' path, then the 'scripts' path"

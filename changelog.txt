@@ -1,3 +1,7 @@
+* Minor update: (201215)
+- don't run 'stop' operations when upgrading package.
+- ensure QTS 4.5.1 correctly enables package icon in App Center.
+
 * Minor update: (201119)
 - ensure symlink to /dev/fd is created so stderr can be captured separately from stdout.
 
