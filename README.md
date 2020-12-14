@@ -15,6 +15,12 @@ This package creates two scripts directories in the package installation path:
 Place SysV-style scripts in `init.d` directory. These will be executed with `start` parameter after NAS startup, and with `stop` parameter before NAS shutdown.
 Scripts in `scripts` directory will be executed only during startup, and always after the custom `init.d` start script execution.
 
+To jump to this location:
+
+```
+cd $(getcfg RunLast Install_path -f /etc/config/qpkg.conf)/scripts
+```
+
 During script execution, stdout and stderr are stored into a log file, which is viewable via the QTS UI.
 
 ## How to install
