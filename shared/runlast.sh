@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-############################################################################
+###############################################################################
 # runlast.sh - (C)opyright 2019-2020 OneCD [one.cd.only@gmail.com]
 #
 # This script is part of the 'RunLast' package
@@ -21,7 +21,7 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see http://www.gnu.org/licenses/.
-############################################################################
+###############################################################################
 
 Init()
     {
@@ -320,7 +320,7 @@ case "$1" in
         RecordComplete "$operation"
         ;;
     stop)
-        if [[ $package_status != REMOVING ]]; then
+        if [[ $package_status != INSTALLING ]]; then
             operation='package reorder'
             RecordStart "$operation"
             if IsQPKGEnabled SortMyQPKGs; then

@@ -108,16 +108,22 @@ PKG_PRE_REMOVE="{
 export package_status=REMOVING
 
 }"
+
+pkg_init()
+	{
+
+	export package_status=INSTALLING
+
+	}
+
 ######################################################################
 # Define any package specific operations that shall be performed when
 # the package is installed.
 ######################################################################
-pkg_pre_install()
-    {
-
-    export package_status=INSTALLING
-
-    }
+#pkg_pre_install()
+#    {
+#
+#    }
 
 pkg_post_install()
     {
