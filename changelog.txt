@@ -1,3 +1,6 @@
+* Minor update: (201223)
+- ensure service script always exits with zero (thank you @pedropombeiro for identifying this!)
+
 * Minor update: (201220)
 - don't run 'stop' operations when upgrading package (fixed).
 - use better rendering for base package icon.
