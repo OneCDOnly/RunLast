@@ -346,4 +346,6 @@ case "$1" in
         ;;
 esac
 
-[[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE" || echo -n ''
+[[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
+
+exit 0
