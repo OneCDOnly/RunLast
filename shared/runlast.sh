@@ -52,8 +52,8 @@ Init()
 
     $SETCFG_CMD "$THIS_QPKG_NAME" Status complete -f "$CONFIG_PATHFILE"
 
-    # KLUDGE: force-cancel QTS 4.5.1 App Center notifier status as it's often wrong. :(
-    [[ -e $APP_CENTER_NOTIFIER ]] && $APP_CENTER_NOTIFIER -c "$THIS_QPKG_NAME" > /dev/null 2>&1
+    # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
+    [[ -e $APP_CENTER_NOTIFIER ]] && $APP_CENTER_NOTIFIER --clean "$THIS_QPKG_NAME" > /dev/null 2>&1
 
     echo "$THIS_QPKG_NAME ($BUILD)"
 
