@@ -1,3 +1,6 @@
+* Minor update: (201225)
+- use '--clean' instead of '--cancel' with App Center notifier (thanks @pedropombeiro for finding this!)
+
 * Minor update: (201223)
 - ensure service script always exits with zero (thank you @pedropombeiro for identifying this!)
 
