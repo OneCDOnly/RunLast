@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# runlast.sh - (C)opyright 2019-2020 OneCD [one.cd.only@gmail.com]
+# runlast.sh - (C)opyright 2019-2021 OneCD [one.cd.only@gmail.com]
 #
 # This script is part of the 'RunLast' package
 #
@@ -27,33 +27,23 @@ Init()
     {
 
     THIS_QPKG_NAME=RunLast
-    CONFIG_PATHFILE=/etc/config/qpkg.conf
-
-    if [[ ! -e $CONFIG_PATHFILE ]]; then
-        echo "file not found [$CONFIG_PATHFILE]"
-        exit 1
-    fi
 
     [[ ! -e /dev/fd ]] && ln -s /proc/self/fd /dev/fd   # sometimes, '/dev/fd' isn't created by QTS. Don't know why.
 
-    readonly GETCFG_CMD=/sbin/getcfg
-    readonly RMCFG_CMD=/sbin/rmcfg
-    readonly SETCFG_CMD=/sbin/setcfg
-    readonly APP_CENTER_NOTIFIER=/sbin/qpkg_cli     # only needed for QTS 4.5.1-and-later
-    local -r QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
+    local -r QPKG_PATH=$(/sbin/getcfg $THIS_QPKG_NAME Install_Path -f /etc/config/qpkg.conf)
     readonly REAL_LOG_PATHFILE=$QPKG_PATH/$THIS_QPKG_NAME.log
     readonly TEMP_LOG_PATHFILE=$REAL_LOG_PATHFILE.tmp
     readonly LINK_LOG_PATHFILE=/var/log/$THIS_QPKG_NAME.log
     local -r GUI_LOG_PATHFILE=/home/httpd/$THIS_QPKG_NAME.log
     readonly SYSV_STORE_PATH=$QPKG_PATH/init.d
     readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
-    readonly BUILD=$($GETCFG_CMD $THIS_QPKG_NAME Build -f $CONFIG_PATHFILE)
+    readonly BUILD=$(/sbin/getcfg $THIS_QPKG_NAME Build -f /etc/config/qpkg.conf)
     readonly LC_ALL=C
 
-    $SETCFG_CMD "$THIS_QPKG_NAME" Status complete -f "$CONFIG_PATHFILE"
+    /sbin/setcfg "$THIS_QPKG_NAME" Status complete -f /etc/config/qpkg.conf
 
     # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
-    [[ -e $APP_CENTER_NOTIFIER ]] && $APP_CENTER_NOTIFIER --clean "$THIS_QPKG_NAME" > /dev/null 2>&1
+    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$THIS_QPKG_NAME" > /dev/null 2>&1
 
     echo "$THIS_QPKG_NAME ($BUILD)"
 
@@ -144,8 +134,8 @@ SendToEnd()
         return 2
     fi
 
-    $RMCFG_CMD "$1" -f "$CONFIG_PATHFILE"
-    echo -e "$buffer" >> "$CONFIG_PATHFILE"
+    /sbin/rmcfg "$1" -f /etc/config/qpkg.conf
+    echo -e "$buffer" >> /etc/config/qpkg.conf
 
     }
 
@@ -159,17 +149,17 @@ ShowDataBlock()
         return 1
     fi
 
-    if ! grep -q "$1" $CONFIG_PATHFILE; then
+    if ! grep -q "$1" /etc/config/qpkg.conf; then
         echo "QPKG not found"
         return 2
     fi
 
-    sl=$(grep -n "^\[$1\]" "$CONFIG_PATHFILE" | cut -f1 -d':')
-    ll=$(wc -l < "$CONFIG_PATHFILE" | tr -d ' ')
-    bl=$(tail -n$((ll-sl)) < "$CONFIG_PATHFILE" | grep -n '^\[' | head -n1 | cut -f1 -d':')
+    sl=$(grep -n "^\[$1\]" /etc/config/qpkg.conf | cut -f1 -d':')
+    ll=$(wc -l < /etc/config/qpkg.conf | tr -d ' ')
+    bl=$(tail -n$((ll-sl)) < /etc/config/qpkg.conf | grep -n '^\[' | head -n1 | cut -f1 -d':')
     [[ ! -z $bl ]] && el=$((sl+bl-1)) || el=$ll
 
-    sed -n "$sl,${el}p" "$CONFIG_PATHFILE"
+    sed -n "$sl,${el}p" /etc/config/qpkg.conf
 
     }
 
@@ -295,7 +285,7 @@ IsQPKGEnabled()
 
     [[ -z $1 ]] && return 1
 
-    if [[ $($GETCFG_CMD "$1" Enable -u -f "$CONFIG_PATHFILE") != 'TRUE' ]]; then
+    if [[ $(/sbin/getcfg "$1" Enable -u -f /etc/config/qpkg.conf) != 'TRUE' ]]; then
         return 1
     else
         return 0
@@ -324,7 +314,7 @@ case "$1" in
             operation='package reorder'
             RecordStart "$operation"
             if IsQPKGEnabled SortMyQPKGs; then
-                if [[ $($GETCFG_CMD SortMyQPKGs Version -d 0 -f $CONFIG_PATHFILE) -ge 181217 ]]; then
+                if [[ $(/sbin/getcfg SortMyQPKGs Version -d 0 -f /etc/config/qpkg.conf) -ge 181217 ]]; then
                     RecordInfo "SortMyQPKGs will reorder this package"
                 else
                     RecordWarning "your SortMyQPKGs version is incompatible with this package"

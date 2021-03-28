@@ -1,3 +1,6 @@
+* Minor update: (210328)
+- Open runtime log in a new QTS window instead of a new page.
+
 * Minor update: (201225)
 - use '--clean' instead of '--cancel' with App Center notifier (thanks @pedropombeiro for finding this!)
 
