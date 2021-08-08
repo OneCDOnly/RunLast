@@ -314,7 +314,9 @@ case "$1" in
             operation='package reorder'
             RecordStart "$operation"
             if IsQPKGEnabled SortMyQPKGs; then
-                if [[ $(/sbin/getcfg SortMyQPKGs Version -d 0 -f /etc/config/qpkg.conf) -ge 181217 ]]; then
+                testver=$(/sbin/getcfg SortMyQPKGs Version -d 0 -f /etc/config/qpkg.conf)
+
+                if [[ ${testver:0:6} -ge 181217 ]]; then
                     RecordInfo "SortMyQPKGs will reorder this package"
                 else
                     RecordWarning "your SortMyQPKGs version is incompatible with this package"

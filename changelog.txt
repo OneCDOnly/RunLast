@@ -1,3 +1,7 @@
+* Minor update: (210809)
+- Ensure SortMyQPKGs version check works correctly with alpha characters after the datecode.
+- Remove max QTS version.
+
 * Minor update: (210328)
 - Open runtime log in a new QTS window instead of a new page.
 
