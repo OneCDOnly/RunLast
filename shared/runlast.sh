@@ -157,7 +157,7 @@ ShowDataBlock()
     sl=$(grep -n "^\[$1\]" /etc/config/qpkg.conf | cut -f1 -d':')
     ll=$(wc -l < /etc/config/qpkg.conf | tr -d ' ')
     bl=$(tail -n$((ll-sl)) < /etc/config/qpkg.conf | grep -n '^\[' | head -n1 | cut -f1 -d':')
-    [[ ! -z $bl ]] && el=$((sl+bl-1)) || el=$ll
+    [[ -n $bl ]] && el=$((sl+bl-1)) || el=$ll
 
     sed -n "$sl,${el}p" /etc/config/qpkg.conf
 

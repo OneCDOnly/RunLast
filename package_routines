@@ -110,11 +110,11 @@ export package_status=REMOVING
 }"
 
 pkg_init()
-	{
+    {
 
-	export package_status=INSTALLING
+    export package_status=INSTALLING
 
-	}
+    }
 
 ######################################################################
 # Define any package specific operations that shall be performed when
@@ -129,5 +129,7 @@ pkg_post_install()
     {
 
     $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Web_Port $($CMD_GETCFG System "Web Access Port")
+    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Scripts $SYS_QPKG_DIR/scripts
+    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME SysV $SYS_QPKG_DIR/init.d
 
     }
