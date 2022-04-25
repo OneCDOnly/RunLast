@@ -1,3 +1,6 @@
+* Minor update: (220426)
+- Use better keynames for scripts and sysv paths.
+
 * Minor update: (220425)
 - Add Scripts and SysV paths to qpkg.conf for easier access.
 

@@ -129,7 +129,7 @@ pkg_post_install()
     {
 
     $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Web_Port $($CMD_GETCFG System "Web Access Port")
-    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Scripts $SYS_QPKG_DIR/scripts
-    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME SysV $SYS_QPKG_DIR/init.d
+    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Scripts_Path $SYS_QPKG_DIR/scripts
+    $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME SysV_Path $SYS_QPKG_DIR/init.d
 
     }
