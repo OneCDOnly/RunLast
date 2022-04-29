@@ -31,9 +31,10 @@ During script execution, stdout and stderr are stored into a log file, which is 
 
 ## How to install
 
-- It's available in the [Qnapclub Store!](https://qnapclub.eu/en/qpkg/690)
+1. Download the latest QPKG version here: [https://github.com/OneCDOnly/RunLast/tree/main/build](https://github.com/OneCDOnly/RunLast/tree/main/build)
 
-- [Click here](https://qnapclub.eu/en/howto/1) to learn how to add the **Qnapclub Store** as an App Center repository in QTS.
+2. Install the QPKG manually in your App Center:
+![img](https://i.imgur.com/ddhUt55.png)
 
 
 ## Notes
