@@ -26,26 +26,27 @@
 Init()
     {
 
-    THIS_QPKG_NAME=RunLast
+    QPKG_NAME=RunLast
 
     [[ ! -e /dev/fd ]] && ln -s /proc/self/fd /dev/fd   # sometimes, '/dev/fd' isn't created by QTS. Don't know why.
 
-    local -r QPKG_PATH=$(/sbin/getcfg $THIS_QPKG_NAME Install_Path -f /etc/config/qpkg.conf)
-    readonly REAL_LOG_PATHFILE=$QPKG_PATH/$THIS_QPKG_NAME.log
+    local -r QPKG_PATH=$(/sbin/getcfg $QPKG_NAME Install_Path -f /etc/config/qpkg.conf)
+    readonly REAL_LOG_PATHFILE=$QPKG_PATH/$QPKG_NAME.log
     readonly TEMP_LOG_PATHFILE=$REAL_LOG_PATHFILE.tmp
-    readonly LINK_LOG_PATHFILE=/var/log/$THIS_QPKG_NAME.log
-    local -r GUI_LOG_PATHFILE=/home/httpd/$THIS_QPKG_NAME.log
+    readonly LINK_LOG_PATHFILE=/var/log/$QPKG_NAME.log
+    local -r GUI_LOG_PATHFILE=/home/httpd/$QPKG_NAME.log
     readonly SYSV_STORE_PATH=$QPKG_PATH/init.d
     readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
-    readonly BUILD=$(/sbin/getcfg $THIS_QPKG_NAME Build -f /etc/config/qpkg.conf)
+    readonly BUILD=$(/sbin/getcfg $QPKG_NAME Build -f /etc/config/qpkg.conf)
     readonly LC_ALL=C
+    readonly SERVICE_STATUS_PATHFILE=/var/run/$QPKG_NAME.last.operation
 
-    /sbin/setcfg "$THIS_QPKG_NAME" Status complete -f /etc/config/qpkg.conf
+    /sbin/setcfg "$QPKG_NAME" Status complete -f /etc/config/qpkg.conf
 
     # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
-    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$THIS_QPKG_NAME" > /dev/null 2>&1
+    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$QPKG_NAME" > /dev/null 2>&1
 
-    echo "$THIS_QPKG_NAME ($BUILD)"
+    echo "$QPKG_NAME ($BUILD)"
 
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
@@ -80,7 +81,6 @@ ProcessSysV()
             ;;
         *)
             return 1
-            ;;
     esac
 
     }
@@ -188,7 +188,7 @@ RecordStart()
     local length=${#buffer}
     local temp=$(printf "%${length}s")
 
-    echo -e "${temp// /─}\n$THIS_QPKG_NAME ($BUILD)\n$buffer" > "$TEMP_LOG_PATHFILE"
+    echo -e "${temp// /─}\n$QPKG_NAME ($BUILD)\n$buffer" > "$TEMP_LOG_PATHFILE"
 
     WriteQTSLog "$op" 0
     echo "$buffer"
@@ -208,6 +208,7 @@ RecordComplete()
     WriteQTSLog "$op" 0
     echo "$buffer"
     CommitGUILog
+    SetServiceOperationResultOK
 
     }
 
@@ -271,7 +272,7 @@ WriteQTSLog()
     #    1 : Warning
     #    2 : Error
 
-    log_tool --append "[$THIS_QPKG_NAME] $1" --type "$2"
+    log_tool --append "[$QPKG_NAME] $1" --type "$2"
 
     }
 
@@ -290,6 +291,29 @@ IsQPKGEnabled()
     else
         return 0
     fi
+
+    }
+
+SetServiceOperationResultOK()
+    {
+
+    SetServiceOperationResult ok
+
+    }
+
+SetServiceOperationResultFailed()
+    {
+
+    SetServiceOperationResult failed
+
+    }
+
+SetServiceOperationResult()
+    {
+
+    # $1 = result of operation to recorded
+
+    [[ -n $1 && -n $SERVICE_STATUS_PATHFILE ]] && echo "$1" > "$SERVICE_STATUS_PATHFILE"
 
     }
 
@@ -322,7 +346,7 @@ case "$1" in
                     RecordWarning "your SortMyQPKGs version is incompatible with this package"
                 fi
             else
-                SendToEnd $THIS_QPKG_NAME
+                SendToEnd "$QPKG_NAME"
             fi
             RecordComplete "$operation"
 
@@ -335,7 +359,6 @@ case "$1" in
     *)
         echo "use '$0 start' to execute files in the 'init.d' path, then the 'scripts' path"
         echo "use '$0 stop' to execute files in the 'init.d' path in reverse order"
-        ;;
 esac
 
 [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"

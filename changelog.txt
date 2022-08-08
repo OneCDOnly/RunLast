@@ -1,3 +1,6 @@
+* Minor update: (220809)
+- Include service script operation status logging.
+
 * Minor update: (220426)
 - Use better keynames for scripts and sysv paths.
 
