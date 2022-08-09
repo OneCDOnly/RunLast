@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# runlast.sh - (C)opyright 2019-2021 OneCD [one.cd.only@gmail.com]
+# runlast.sh - (C)opyright 2019-2022 OneCD [one.cd.only@gmail.com]
 #
 # This script is part of the 'RunLast' package
 #
