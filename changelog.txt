@@ -1,3 +1,6 @@
+* Minor update: (230112)
+- Update ref to myqnap.org
+
 * Minor update: (220809)
 - Include service script operation status logging.
 

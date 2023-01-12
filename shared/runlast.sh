@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 ###############################################################################
-# runlast.sh - (C)opyright 2019-2022 OneCD [one.cd.only@gmail.com]
-#
+# runlast.sh - (C)opyright 2019-2023 OneCD [one.cd.only@gmail.com]
+
 # This script is part of the 'RunLast' package
-#
+
 # For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=145975]
-#
-# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/690]
+
+# Available in the myqnap store: [https://myqnap.org]
 # Project source: [https://github.com/OneCDOnly/RunLast]
-#
+
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
-#
+
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
-#
+
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see http://www.gnu.org/licenses/.
 ###############################################################################
@@ -38,7 +38,6 @@ Init()
     readonly SYSV_STORE_PATH=$QPKG_PATH/init.d
     readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
     readonly BUILD=$(/sbin/getcfg $QPKG_NAME Build -f /etc/config/qpkg.conf)
-    readonly LC_ALL=C
     readonly SERVICE_STATUS_PATHFILE=/var/run/$QPKG_NAME.last.operation
 
     /sbin/setcfg "$QPKG_NAME" Status complete -f /etc/config/qpkg.conf
