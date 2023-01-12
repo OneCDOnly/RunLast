@@ -1,4 +1,4 @@
-![icon](images/runlast-cs-b.png)
+![icon](images/RunLast.readme.png)
 
 ## Description
 
