@@ -12,8 +12,8 @@ This package creates two scripts directories in the package installation path:
 - `init.d`
 - `scripts`
 
-Place SysV-style scripts in `init.d` directory. These will be executed with `start` parameter after NAS startup, and with `stop` parameter before NAS shutdown.
-Scripts in `scripts` directory will be executed only during startup, and always after the custom `init.d` start script execution.
+Place your SysV-style scripts in the `init.d` directory. These will be executed with a `start` parameter after NAS startup, and with a `stop` parameter before NAS shutdown.
+Scripts in the `scripts` directory will be executed only during startup, and always after the custom `init.d` start script execution.
 
 To jump to the `scripts` directory:
 
