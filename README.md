@@ -15,11 +15,9 @@ This package creates two scripts directories in the package installation path:
 Place your SysV-style scripts in the `init.d` directory. These will be executed with a `start` parameter after NAS startup, and with a `stop` parameter before NAS shutdown.
 Scripts in the `scripts` directory will be executed only during startup, and always after the custom `init.d` start script execution.
 
-## How to install
+## Installation
 
-1. Download the latest QPKG version here: [https://github.com/OneCDOnly/RunLast/tree/main/build](https://github.com/OneCDOnly/RunLast/tree/main/build)
-
-2. Install the QPKG manually in your App Center
+- available in the [MyQNAP repo](https://www.myqnap.org/product/runlast), and can also be installed via the [sherpa](https://github.com/OneCDOnly/sherpa) package manager.
 
 
 ## Notes

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 ###############################################################################
-# runlast.sh - (C)opyright 2019-2023 OneCD [one.cd.only@gmail.com]
+# runlast.sh - (C)opyright 2019-2023 OneCD - one.cd.only@gmail.com
 
 # This script is part of the 'RunLast' package
 
-# For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=145975]
+# For more info: https://forum.qnap.com/viewtopic.php?f=320&t=145975
 
-# Available in the myqnap store: [https://myqnap.org]
-# Project source: [https://github.com/OneCDOnly/RunLast]
+# Available in the MyQNAP store: https://www.myqnap.org/product/runlast
+# Project source: https://github.com/OneCDOnly/RunLast
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
