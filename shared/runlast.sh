@@ -23,6 +23,8 @@
 # this program. If not, see http://www.gnu.org/licenses/.
 ###############################################################################
 
+readonly USER_ARGS_RAW=$*
+
 Init()
     {
 
@@ -44,9 +46,7 @@ Init()
 
     # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
     [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$QPKG_NAME" > /dev/null 2>&1
-
-    echo "$QPKG_NAME ($BUILD)"
-
+    [[ ${#USER_ARGS_RAW} -eq 0 ]] && echo "$QPKG_NAME ($BUILD)"
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
     [[ ! -L $GUI_LOG_PATHFILE ]] && ln -s "$REAL_LOG_PATHFILE" "$GUI_LOG_PATHFILE"
@@ -194,7 +194,7 @@ RecordStart()
 
     }
 
-RecordComplete()
+RecordEnd()
     {
 
     # $1 = operation
@@ -330,7 +330,7 @@ case "$1" in
             ProcessSysV start
             ProcessScripts
         fi
-        RecordComplete "$operation"
+        RecordEnd "$operation"
         ;;
     stop)
         if [[ $package_status != INSTALLING ]]; then
@@ -347,17 +347,22 @@ case "$1" in
             else
                 SendToEnd "$QPKG_NAME"
             fi
-            RecordComplete "$operation"
+            RecordEnd "$operation"
 
             operation='"stop" scripts'
             RecordStart "$operation"
             ProcessSysV stop
-            RecordComplete "$operation"
+            RecordEnd "$operation"
         fi
         ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
     *)
-        echo "use '$0 start' to execute files in the 'init.d' path, then the 'scripts' path"
-        echo "use '$0 stop' to execute files in the 'init.d' path in reverse order"
+        echo "  use '$0 start' to execute files in the 'init.d' path, then the 'scripts' path"
+        echo "  use '$0 stop' to execute files in the 'init.d' path in reverse order"
+        echo "  use '$0 restart' to stop, then start this QPKG"
 esac
 
 [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"

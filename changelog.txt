@@ -1,3 +1,6 @@
+* Minor update: (230131)
+- add support for 'restart' init action.
+
 * Minor update: (230112)
 - Update ref to myqnap.org
 
