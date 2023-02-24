@@ -1,3 +1,6 @@
+* Minor update: (230224)
+- update package icon.
+
 * Minor update: (230131)
 - add support for 'restart' init action.
 
