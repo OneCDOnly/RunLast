@@ -28,7 +28,7 @@ readonly USER_ARGS_RAW=$*
 Init()
     {
 
-    QPKG_NAME=RunLast
+    readonly QPKG_NAME=RunLast
 
     [[ ! -e /dev/fd ]] && ln -s /proc/self/fd /dev/fd   # sometimes, '/dev/fd' isn't created by QTS. Don't know why.
 
@@ -46,6 +46,7 @@ Init()
 
     # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
     [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$QPKG_NAME" > /dev/null 2>&1
+
     [[ ${#USER_ARGS_RAW} -eq 0 ]] && echo "$QPKG_NAME ($BUILD)"
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
