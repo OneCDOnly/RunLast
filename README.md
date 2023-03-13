@@ -6,6 +6,9 @@
 
 This allows you to run scripts dependent on QPKGs during QTS startup.
 
+The aim of this project is to support **all** QNAP NAS models and **all** QTS & QuTS hero versions. Please advise if you encounter any errors when running it on your NAS.
+
+
 ## What it does
 
 This package creates two scripts directories in the package installation path:
