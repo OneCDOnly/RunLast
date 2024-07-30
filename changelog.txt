@@ -1,3 +1,7 @@
+* Minor update: (240731)
+- update compatibility with sherpa package manager.
+- code refresh.
+
 * Minor update: (230224)
 - update package icon.
 
