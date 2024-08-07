@@ -8,10 +8,9 @@
 #
 # This script is part of the 'RunLast' package
 #
-# For more info: https://forum.qnap.com/viewtopic.php?f=320&t=145975
-#
 # Available in the MyQNAP store: https://www.myqnap.org/product/runlast
 # Project source: https://github.com/OneCDOnly/RunLast
+# Community forum: https://forum.qnap.com/viewtopic.php?t=145975
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -480,6 +479,15 @@ Init
 user_arg=${USER_ARGS_RAW%% *}		# Only process first argument.
 
 case $user_arg in
+    ?(-)r|?(--)restart)
+        SetServiceAction restart
+
+        if StopQPKG && StartQPKG; then
+            SetServiceResultAsOK
+        else
+            SetServiceResultAsFailed
+        fi
+        ;;
     ?(--)start)
         SetServiceAction start
 
@@ -496,15 +504,6 @@ case $user_arg in
         SetServiceAction stop
 
         if StopQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    ?(-)r|?(--)restart)
-        SetServiceAction restart
-
-        if StopQPKG && StartQPKG; then
             SetServiceResultAsOK
         else
             SetServiceResultAsFailed
