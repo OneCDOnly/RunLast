@@ -37,6 +37,12 @@ Init()
 
     readonly QPKG_NAME=RunLast
 
+    # KLUDGE: mark QPKG installation as complete.
+    /sbin/setcfg "$QPKG_NAME" Status complete -f /etc/config/qpkg.conf
+
+    # KLUDGE: 'clean' the QTS 4.5.1+ App Center notifier status.
+    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$QPKG_NAME" > /dev/null 2>&1
+
     local -r QPKG_PATH=$(/sbin/getcfg $QPKG_NAME Install_Path -f /etc/config/qpkg.conf)
 		readonly SCRIPT_STORE_PATH=$QPKG_PATH/scripts
 		readonly SYSV_STORE_PATH=$QPKG_PATH/init.d
@@ -48,11 +54,6 @@ Init()
 		readonly TEMP_LOG_PATHFILE=$REAL_LOG_PATHFILE.tmp
 	readonly SERVICE_ACTION_PATHFILE=/var/log/$QPKG_NAME.action
 	readonly SERVICE_RESULT_PATHFILE=/var/log/$QPKG_NAME.result
-
-    /sbin/setcfg "$QPKG_NAME" Status complete -f /etc/config/qpkg.conf
-
-    # KLUDGE: 'clean' the QTS 4.5.1 App Center notifier status
-    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean "$QPKG_NAME" > /dev/null 2>&1
 
     [[ ! -e $REAL_LOG_PATHFILE ]] && touch "$REAL_LOG_PATHFILE"
     [[ -e $TEMP_LOG_PATHFILE ]] && rm -f "$TEMP_LOG_PATHFILE"
