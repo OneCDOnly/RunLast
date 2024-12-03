@@ -6,7 +6,7 @@
 
 This allows you to run scripts dependent on QPKGs during QTS startup.
 
-The aim of this project is to support **all** QNAP NAS models and **all** QTS & QuTS hero versions from v4.0.0 to v5.1.8. Please advise if you encounter any errors when running it on your NAS.
+The aim of this project is to support **all** QNAP NAS models and **all** QTS & QuTS hero versions from v4.0.0 to v5.1.9. Please advise if you encounter any errors when running it on your NAS.
 
 ## What it does
 

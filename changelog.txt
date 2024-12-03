@@ -1,3 +1,6 @@
+* Minor update: (241204)
+- package: set QTS 5.1.9 as max version.
+
 * Minor update: (240922)
 - package: set QTS 5.1.8 as max version.
 
