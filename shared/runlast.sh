@@ -72,6 +72,8 @@ Init()
 	[[ ! -d $r_sysv_store_path ]] && mkdir -p "$r_sysv_store_path"
 	[[ ! -d $r_script_store_path ]] && mkdir -p "$r_script_store_path"
 
+	SetOsFirmwareVer
+
 	}
 
 StartQPKG()
@@ -107,9 +109,6 @@ StopQPKG()
 	{
 
 	if [[ ${package_status:=none} != INSTALLING ]]; then
-		operation='package reorder'
-		RecordStart "$operation"
-
 		if IsQPKGEnabled SortMyQPKGs; then
 			testver=$(/sbin/getcfg SortMyQPKGs Version -d 0 -f /etc/config/qpkg.conf)
 
@@ -119,10 +118,11 @@ StopQPKG()
 				RecordWarning 'your SortMyQPKGs version is incompatible with this package'
 			fi
 		elif ! IsOsCanAsyncQpkgActions; then
+			operation='package reorder'
+			RecordStart "$operation"
 			MoveConfigToBottom $r_qpkg_name
+			RecordEnd "$operation"
 		fi
-
-		RecordEnd "$operation"
 
 		operation='"stop" scripts'
 		RecordStart "$operation"
