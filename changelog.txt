@@ -1,3 +1,8 @@
+* Minor update: (2507070)
+- add support for QTS 5.2.0-and-later.
+- package: remove max version.
+- general code refresh.
+
 * Minor update: (241204)
 - package: set QTS 5.1.9 as max version.
 
