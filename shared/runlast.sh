@@ -41,19 +41,19 @@ ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
 readonly r_user_args_raw=$*
 
 Init()
-    {
+	{
 
-    readonly r_qpkg_name=RunLast
+	readonly r_qpkg_name=RunLast
 
-    # KLUDGE: mark QPKG installation as complete.
+	# KLUDGE: mark QPKG installation as complete.
 
-    /sbin/setcfg $r_qpkg_name Status complete -f /etc/config/qpkg.conf
+	/sbin/setcfg $r_qpkg_name Status complete -f /etc/config/qpkg.conf
 
-    # KLUDGE: 'clean' the QTS 4.5.1+ App Center notifier status.
+	# KLUDGE: 'clean' the QTS 4.5.1+ App Center notifier status.
 
-    [[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean $r_qpkg_name &> /dev/null
+	[[ -e /sbin/qpkg_cli ]] && /sbin/qpkg_cli --clean $r_qpkg_name &> /dev/null
 
-    local -r r_qpkg_path=$(/sbin/getcfg $r_qpkg_name Install_Path -f /etc/config/qpkg.conf)
+	local -r r_qpkg_path=$(/sbin/getcfg $r_qpkg_name Install_Path -f /etc/config/qpkg.conf)
 		readonly r_script_store_path=$r_qpkg_path/scripts
 		readonly r_sysv_store_path=$r_qpkg_path/init.d
 
@@ -89,11 +89,11 @@ StartQPKG()
 			return 1
 		else
 			while IsOsStartingPackages; do
-				echo "[$(date)]: OS is still starting packages, sleeping for 10 seconds" >> /var/log/${r_qpkg_name}-sleeper.log
+				echo "[$(/bin/date)]: OS is still starting packages, sleeping for 10 seconds" >> /var/log/${r_qpkg_name}-sleeper.log
 				sleep 10
 			done
 
-			echo "[$(date)]: OS has completed starting packages" >> /var/log/${r_qpkg_name}-sleeper.log
+			echo "[$(/bin/date)]: OS has completed starting packages" >> /var/log/${r_qpkg_name}-sleeper.log
 
 			operation='"start" scripts'
 			RecordStart "$operation"
@@ -135,66 +135,66 @@ StopQPKG()
 StatusQPKG()
 	{
 
-    if IsQPKGEnabled; then
-        echo active
-        exit 0
-    else
-        echo inactive
-        exit 1
-    fi
+	if IsQPKGEnabled; then
+		echo active
+		exit 0
+	else
+		echo inactive
+		exit 1
+	fi
 
 	}
 
 ProcessSysV()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = 'start' or 'stop'
+	#	$1 = 'start' or 'stop'
 
-    [[ -z ${1:-} ]] && return
+	[[ -z ${1:-} ]] && return
 
-    local script_pathname=''
+	local script_pathname=''
 
-    case ${1:-} in
-        start)
-            # Execute 'init.d' script names in-order.
+	case ${1:-} in
+		start)
+			# Execute 'init.d' script names in-order.
 
-            ls "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
-                [[ -x $script_pathname ]] && RunAndLog "'$script_pathname' start"
-            done
-            ;;
-        stop)
-            # Execute 'init.d' script names in reverse-order.
+			ls "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
+				[[ -x $script_pathname ]] && RunAndLog "'$script_pathname' start"
+			done
+			;;
+		stop)
+			# Execute 'init.d' script names in reverse-order.
 
-            ls -r "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
-                [[ -x $script_pathname ]] && RunAndLog "'$script_pathname' stop"
-            done
-            ;;
-        *)
-            return 1
-    esac
+			ls -r "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
+				[[ -x $script_pathname ]] && RunAndLog "'$script_pathname' stop"
+			done
+			;;
+		*)
+			return 1
+	esac
 
-    }
+	}
 
 ProcessScripts()
-    {
+	{
 
-    local script_pathname=''
+	local script_pathname=''
 
-    # Read 'scripts' script names in order and execute.
+	# Read 'scripts' script names in order and execute.
 
-    ls "$r_script_store_path"/* 2>/dev/null | while read -r script_pathname; do
-        [[ -x $script_pathname ]] && RunAndLog "'$script_pathname'"
-    done
+	ls "$r_script_store_path"/* 2>/dev/null | while read -r script_pathname; do
+		[[ -x $script_pathname ]] && RunAndLog "'$script_pathname'"
+	done
 
-    }
+	}
 
 ShowTitle()
-    {
+	{
 
-    echo "$(ShowAsTitleName) $(ShowAsVersion)"
+	echo "$(ShowAsTitleName) $(ShowAsVersion)"
 
-    }
+	}
 
 ShowAsTitleName()
 	{
@@ -211,210 +211,210 @@ ShowAsVersion()
 	}
 
 ShowAsUsage()
-    {
+	{
 
-    echo -e "\nUsage: $0 {start|stop|restart|status}"
-    echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path, then the 'scripts' path:\n\t$0 start"
-    echo -e "\nTo execute execute files in the $r_qpkg_name 'init.d' path in reverse order:\n\t$0 stop"
-    echo -e "\nTo stop, then start this QPKG:\n\t$0 restart"
+	echo -e "\nUsage: $0 {start|stop|restart|status}"
+	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path, then the 'scripts' path:\n\t$0 start"
+	echo -e "\nTo execute execute files in the $r_qpkg_name 'init.d' path in reverse order:\n\t$0 stop"
+	echo -e "\nTo stop, then start this QPKG:\n\t$0 restart"
 
 	}
 
 RunAndLog()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = command to run
+	#	$1 = command to run
 
-    if [[ -z ${1:-} ]]; then
-        echo 'command not specified'
-        return 1
-    fi
+	if [[ -z ${1:-} ]]; then
+		echo 'command not specified'
+		return 1
+	fi
 
-    echo "[$(date)] -> execute: \"${1:-}\" ..." | tee -a "$r_temp_log_pathfile"
+	echo "[$(/bin/date)] -> execute: \"${1:-}\" ..." | /usr/bin/tee -a "$r_temp_log_pathfile"
 
-    {   # https://unix.stackexchange.com/a/430182/110015
-        stdout=$(eval "${1:-}" 2> /dev/fd/3)
-        exitcode=$?
-        stderr=$(cat<&3)
-    } 3<<EOF
+	{	# https://unix.stackexchange.com/a/430182/110015
+		stdout=$(eval "${1:-}" 2> /dev/fd/3)
+		exitcode=$?
+		stderr=$(/bin/cat<&3)
+	} 3<<EOF
 EOF
 
-    echo -e "[$(date)] => exitcode: ($exitcode)\n[$(date)] => stdout: \"$stdout\"\n[$(date)] => stderr: \"$stderr\"" | tee -a "$r_temp_log_pathfile"
+	echo -e "[$(/bin/date)] => exitcode: ($exitcode)\n[$(/bin/date)] => stdout: \"$stdout\"\n[$(/bin/date)] => stderr: \"$stderr\"" | /usr/bin/tee -a "$r_temp_log_pathfile"
 
-    return 0
+	return 0
 
-    }
+	}
 
 MoveConfigToBottom()
-    {
+	{
 
-    # Move $1 to the bottom of /etc/config/qpkg.conf
+	# Move $1 (QPKG name) to the bottom of /etc/config/qpkg.conf
 
-    [[ -n ${1:-} ]] || return
+	[[ -n ${1:-} ]] || return
 
-    local a=''
+	local a=''
 
-    a=$(GetConfigBlock ${1:-})
-    [[ -n $a ]] || return
+	a=$(GetConfigBlock ${1:-})
+	[[ -n $a ]] || return
 
-    /sbin/rmcfg ${1:-} -f /etc/config/qpkg.conf
-    echo -e "\n${a}" >> /etc/config/qpkg.conf
+	/sbin/rmcfg ${1:-} -f /etc/config/qpkg.conf
+	echo -e "\n${a}" >> /etc/config/qpkg.conf
 
-    }
+	}
 
 GetConfigBlock()
-    {
+	{
 
-    # Return the config block for the QPKG name specified as $1
+	# Output the config block for $1 (QPKG name).
 
-    [[ -n ${1:-} ]] || return
+	[[ -n ${1:-} ]] || return
 
-    local -i sl=0       # line number: start of specified config block
-    local -i ll=0       # line number: last line in file
-    local -i bl=0       # total lines in specified config block
-    local -i el=0       # line number: end of specified config block
+	local -i sl=0		# start line number of config block.
+	local -i ll=0		# last line number in file.
+	local -i tl=0		# total lines in config block.
+	local -i el=0		# end line number of config block.
 
-    sl=$(/bin/grep -n "^\[${1:-}\]" /etc/config/qpkg.conf | cut -f1 -d':')
-    [[ -n $sl ]] || return
+	sl=$(/bin/grep -n "^\[${1:-}\]" /etc/config/qpkg.conf | /usr/bin/cut -f1 -d':')
+	[[ -n $sl ]] || return
 
-    ll=$(wc -l < /etc/config/qpkg.conf | tr -d ' ')
-    bl=$(tail -n$((ll-sl)) < /etc/config/qpkg.conf | /bin/grep -n '^\[' | head -n1 | cut -f1 -d':')
+	ll=$(/usr/bin/wc -l < /etc/config/qpkg.conf | /bin/tr -d ' ')
+	tl=$(/usr/bin/tail -n$((ll-sl)) < /etc/config/qpkg.conf | /bin/grep -n '^\[' | /usr/bin/head -n1 | /usr/bin/cut -f1 -d':')
 
-    [[ $bl -ne 0 ]] && el=$((sl+bl-1)) || el=$ll
-    [[ -n $el ]] || return
+	[[ $tl -ne 0 ]] && el=$((sl+tl-1)) || el=$ll
+	[[ -n $el ]] || return
 
-    echo -e "$(sed -n "$sl,${el}p" /etc/config/qpkg.conf)"     # Output this with 'echo' to strip trailing LFs from config block.
+	echo -e "$(/bin/sed -n "$sl,${el}p" /etc/config/qpkg.conf)"		# Output this with 'echo' to strip trailing LFs from config block.
 
-    }
+	}
 
 TrimGUILog()
-    {
+	{
 
-    local max_ops=10
-    local op_lines=$(/bin/grep -n "^──" "$r_real_log_pathfile")
-    local op_count=$(echo "$op_lines" | wc -l)
+	local max_ops=10
+	local op_lines=$(/bin/grep -n "^──" "$r_real_log_pathfile")
+	local op_count=$(echo "$op_lines" | /usr/bin/wc -l)
 
-    if [[ $op_count -gt $max_ops ]]; then
-        local last_op_line_num=$(echo "$op_lines" | head -n$((max_ops+1)) | tail -n1 | cut -f1 -d:)
-        head -n"$last_op_line_num" "$r_real_log_pathfile" > "$r_temp_log_pathfile"
-        mv "$r_temp_log_pathfile" "$r_real_log_pathfile"
-    fi
+	if [[ $op_count -gt $max_ops ]]; then
+		local last_op_line_num=$(echo "$op_lines" | /usr/bin/head -n$((max_ops+1)) | /usr/bin/tail -n1 | /usr/bin/cut -f1 -d:)
+		/usr/bin/head -n"$last_op_line_num" "$r_real_log_pathfile" > "$r_temp_log_pathfile"
+		mv "$r_temp_log_pathfile" "$r_real_log_pathfile"
+	fi
 
-    }
+	}
 
 RecordStart()
-    {
+	{
 
 	# Inputs: (local)
-    # 	$1 = operation
+	#	$1 = operation
 
-    local op="begin ${1:-} ..."
-    local buffer="[$(date)] $op"
-    local length=${#buffer}
-    local temp=$(printf "%${length}s")
+	local op="begin ${1:-} ..."
+	local buffer="[$(/bin/date)] $op"
+	local length=${#buffer}
+	local temp=$(printf "%${length}s")
 
-    echo -e "${temp// /─}\n$r_qpkg_name ($r_qpkg_version)\n$buffer" > "$r_temp_log_pathfile"
+	echo -e "${temp// /─}\n$r_qpkg_name ($r_qpkg_version)\n$buffer" > "$r_temp_log_pathfile"
 
-    WriteQTSLog "$op" 0
-    echo "$buffer"
+	WriteQTSLog "$op" 0
+	echo "$buffer"
 
-    }
+	}
 
 RecordEnd()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = operation
+	#	$1 = operation
 
-    local op="end ${1:-}"
-    local buffer="[$(date)] $op"
+	local op="end ${1:-}"
+	local buffer="[$(/bin/date)] $op"
 
-    echo -e "$buffer" >> "$r_temp_log_pathfile"
+	echo -e "$buffer" >> "$r_temp_log_pathfile"
 
-    WriteQTSLog "$op" 0
-    echo "$buffer"
-    CommitGUILog
-    SetServiceResultAsOK
+	WriteQTSLog "$op" 0
+	echo "$buffer"
+	CommitGUILog
+	SetServiceResultAsOK
 
-    }
+	}
 
 RecordInfo()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = message
+	#	$1 = message
 
-    local buffer="[$(date)] ${1:-}"
+	local buffer="[$(/bin/date)] ${1:-}"
 
-    echo -e "$buffer" >> "$r_temp_log_pathfile"
+	echo -e "$buffer" >> "$r_temp_log_pathfile"
 
-    WriteQTSLog "${1:-}" 0
-    echo "$buffer"
+	WriteQTSLog "${1:-}" 0
+	echo "$buffer"
 
-    }
+	}
 
 RecordWarning()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = message
+	#	$1 = message
 
-    local buffer="[$(date)] ${1:-}"
+	local buffer="[$(/bin/date)] ${1:-}"
 
-    echo -e "$buffer" >> "$r_temp_log_pathfile"
+	echo -e "$buffer" >> "$r_temp_log_pathfile"
 
-    WriteQTSLog "${1:-}" 1
-    echo "$buffer"
+	WriteQTSLog "${1:-}" 1
+	echo "$buffer"
 
-    }
+	}
 
 # RecordError()
-#     {
-#
-#     # $1 = message
-#
-#     local buffer="[$(date)] ${1:-}"
-#
-#     echo -e "$buffer" >> "$r_temp_log_pathfile"
-#
-#     WriteQTSLog "${1:-}" 2
-#     echo "$buffer"
-#
-#     }
+#	{
+
+#	# $1 = message
+
+#	local buffer="[$(/bin/date)] ${1:-}"
+
+#	echo -e "$buffer" >> "$r_temp_log_pathfile"
+
+#	WriteQTSLog "${1:-}" 2
+#	echo "$buffer"
+
+#	}
 
 CommitGUILog()
-    {
+	{
 
-    echo -e "$(<"$r_temp_log_pathfile")\n$(<"$r_real_log_pathfile")" > "$r_real_log_pathfile"
+	echo -e "$(<"$r_temp_log_pathfile")\n$(<"$r_real_log_pathfile")" > "$r_real_log_pathfile"
 
-    TrimGUILog
+	TrimGUILog
 
-    }
+	}
 
 WriteQTSLog()
-    {
+	{
 
 	# Inputs: (local)
-    #	$1 = message to write into NAS system log
-    #	$2 = event type:
-    #		0 : Information
-    #		1 : Warning
-    #		2 : Error
+	#	$1 = message to write into NAS system log
+	#	$2 = event type:
+	#		0 : Information
+	#		1 : Warning
+	#		2 : Error
 
-    log_tool --append "[$r_qpkg_name] ${1:-}" --type "${2:-}"
+	/sbin/log_tool --append "[$r_qpkg_name] ${1:-}" --type "${2:-}"
 
-    }
+	}
 
 IsQPKGEnabled()
 	{
 
 	# Inputs: (local)
-	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
+	#	$1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
 	# Outputs: (local)
-	#   $? = 0 : true
-	#   $? = 1 : false
+	#	$? = 0 : true
+	#	$? = 1 : false
 
 	[[ $(Lowercase "$(/sbin/getcfg ${1:-$r_qpkg_name} Enable -d false -f /etc/config/qpkg.conf)") = true ]]
 
@@ -424,11 +424,11 @@ IsNotQPKGEnabled()
 	{
 
 	# Inputs: (local)
-	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
+	#	$1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
 	# Outputs: (local)
-	#   $? = 0 : true
-	#   $? = 1 : false
+	#	$? = 0 : true
+	#	$? = 1 : false
 
 	! IsQPKGEnabled "${1:-$r_qpkg_name}"
 
@@ -471,9 +471,9 @@ GetOsFirmwareVer()
 
 	# Outputs: (local)
 	#	stdout = integer.
-	#   $? = 0 if found, 250 if not.
+	#	$? = 0 if found, 250 if not.
 
-	/sbin/getcfg System Version -d undefined -f /etc/config/uLinux.conf | tr -d '.'
+	/sbin/getcfg System Version -d undefined -f /etc/config/uLinux.conf | /bin/tr -d '.'
 
 	}
 
@@ -527,14 +527,14 @@ SetServiceResultAsInProgress()
 CommitServiceAction()
 	{
 
-    echo "$service_action" > "$r_service_action_pathfile"
+	echo "$service_action" > "$r_service_action_pathfile"
 
 	}
 
 CommitServiceResult()
 	{
 
-    echo "$service_result" > "$r_service_result_pathfile"
+	echo "$service_result" > "$r_service_result_pathfile"
 
 	}
 
@@ -543,14 +543,14 @@ TextBrightWhite()
 
 	[[ -n ${1:-} ]] || return
 
-    printf '\033[1;97m%s\033[0m' "${1:-}"
+	printf '\033[1;97m%s\033[0m' "${1:-}"
 
 	}
 
 Lowercase()
 	{
 
-	tr 'A-Z' 'a-z' <<< "${1:-}"
+	/bin/tr 'A-Z' 'a-z' <<< "${1:-}"
 
 	}
 
@@ -559,39 +559,39 @@ Init
 user_arg=${r_user_args_raw%% *}		# Only process first argument.
 
 case $user_arg in
-    ?(-)r|?(--)restart)
-        SetServiceAction restart
+	?(-)r|?(--)restart)
+		SetServiceAction restart
 
-        if StopQPKG && StartQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    ?(--)start)
-        SetServiceAction start
+		if StopQPKG && StartQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	?(--)start)
+		SetServiceAction start
 
-        if StartQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    ?(-)s|?(--)status)
-        StatusQPKG
-        ;;
-    ?(--)stop)
-        SetServiceAction stop
+		if StartQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	?(-)s|?(--)status)
+		StatusQPKG
+		;;
+	?(--)stop)
+		SetServiceAction stop
 
-        if StopQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    *)
-        ShowTitle
-        ShowAsUsage
+		if StopQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	*)
+		ShowTitle
+		ShowAsUsage
 esac
 
 [[ -e $r_temp_log_pathfile ]] && rm -f "$r_temp_log_pathfile"
