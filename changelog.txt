@@ -1,5 +1,5 @@
 * Minor update: (250711)
-- code: include startup process timeout, improve log format, make log this-session-only.
+- code: include startup process timeout, improve log format, make log this-session-only, add arg to show log.
 
 * Minor update: (250708)
 - code: optimise whitespace bytes.

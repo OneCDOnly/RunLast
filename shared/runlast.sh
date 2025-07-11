@@ -229,10 +229,21 @@ ShowAsVersion()
 ShowAsUsage()
 	{
 
-	echo -e "\nUsage: $0 {start|stop|restart|status}"
+	echo -e "\nUsage: $0 {start|stop|restart|status|log}"
 	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path, then files in the 'scripts' path:\n\t$0 start"
 	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path in reverse order:\n\t$0 stop"
 	echo -e "\nTo stop, then start this QPKG:\n\t$0 restart"
+
+	}
+
+ShowLog()
+	{
+
+	if [[ -e $r_log_pathfile ]]; then
+		/bin/less "$r_log_pathfile"
+	else
+		echo 'no log to display.'
+	fi
 
 	}
 
@@ -636,6 +647,9 @@ Init
 user_arg=${r_user_args_raw%% *}		# Only process first argument.
 
 case $user_arg in
+	l|log)
+		ShowLog
+		;;
 	?(-)r|?(--)restart)
 		SetServiceAction restart
 
