@@ -57,18 +57,15 @@ Init()
 		readonly r_script_store_path=$r_qpkg_path/scripts
 		readonly r_sysv_store_path=$r_qpkg_path/init.d
 
-	readonly r_qpkg_version=$(/sbin/getcfg $r_qpkg_name Version -f /etc/config/qpkg.conf)
 	local -r r_gui_log_pathfile=/home/httpd/$r_qpkg_name.log
-	local -r r_link_log_pathfile=/var/log/$r_qpkg_name.log
-	readonly r_real_log_pathfile=$r_qpkg_path/$r_qpkg_name.log
-		readonly r_temp_log_pathfile=$r_real_log_pathfile.tmp
+	readonly r_log_pathfile=/var/log/$r_qpkg_name.log
+	readonly r_qpkg_version=$(/sbin/getcfg $r_qpkg_name Version -f /etc/config/qpkg.conf)
 	readonly r_service_action_pathfile=/var/log/$r_qpkg_name.action
 	readonly r_service_result_pathfile=/var/log/$r_qpkg_name.result
+	readonly r_sleeper_log_pathfile=/var/log/$r_qpkg_name-sleeper.log
 
-	[[ ! -e $r_real_log_pathfile ]] && touch "$r_real_log_pathfile"
-	[[ -e $r_temp_log_pathfile ]] && rm -f "$r_temp_log_pathfile"
-	[[ ! -L $r_gui_log_pathfile ]] && ln -s "$r_real_log_pathfile" "$r_gui_log_pathfile"
-	[[ ! -L $r_link_log_pathfile ]] && ln -s "$r_real_log_pathfile" "$r_link_log_pathfile"
+	[[ ! -e $r_log_pathfile ]] && touch "$r_log_pathfile"
+	[[ ! -L $r_gui_log_pathfile ]] && ln -s "$r_log_pathfile" "$r_gui_log_pathfile"
 	[[ ! -d $r_sysv_store_path ]] && mkdir -p "$r_sysv_store_path"
 	[[ ! -d $r_script_store_path ]] && mkdir -p "$r_script_store_path"
 
@@ -83,25 +80,44 @@ StartQPKG()
 		operation=installation
 		RecordStart "$operation"
 		RecordEnd "$operation"
-	else
-		if IsNotQPKGEnabled; then
-			echo -e "This QPKG is disabled. Please enable it first with:\n\tqpkg_service enable $r_qpkg_name"
-			return 1
+		return
+	fi
+
+	if IsNotQPKGEnabled; then
+		echo -e "This QPKG is disabled. Please enable it first with:\n\tqpkg_service enable $r_qpkg_name"
+		return 1
+	fi
+
+	local -i start_seconds=$(/bin/date +%s)
+	local -i timeout_seconds=1800
+	local -i timeout_limit_seconds=$((start_seconds+timeout_seconds))
+	local -i recheck_seconds=10
+	local -i now_seconds=0
+
+	WriteToSleeperLog 'initial QPKG startup check ...'
+
+	while true; do
+		now_seconds=$(/bin/date +%s)
+
+		if IsOsStartingPackages; then
+			if [[ $now_seconds -ge $timeout_limit_seconds ]]; then
+				AppendToSleeperLog "$(GetOsName) startup timeout reached ($timeout_seconds seconds). Unable to execute userscripts."
+				return 1
+			fi
+
+			AppendToSleeperLog "$(GetOsName) is starting packages (recheck in $recheck_seconds seconds)."
+			/bin/sleep $recheck_seconds
 		else
-			while IsOsStartingPackages; do
-				echo "[$(/bin/date)]: OS is still starting packages, sleeping for 10 seconds" >> /var/log/${r_qpkg_name}-sleeper.log
-				sleep 10
-			done
+			AppendToSleeperLog "$(GetOsName) is NOT starting packages (after $((now_seconds-start_seconds)) seconds)."
 
-			echo "[$(/bin/date)]: OS has completed starting packages" >> /var/log/${r_qpkg_name}-sleeper.log
-
-			operation='"start" scripts'
+			operation="'start' scripts"
 			RecordStart "$operation"
 			ProcessSysV start
 			ProcessScripts
 			RecordEnd "$operation"
+			break
 		fi
-	fi
+	done
 
 	}
 
@@ -124,7 +140,7 @@ StopQPKG()
 			RecordEnd "$operation"
 		fi
 
-		operation='"stop" scripts'
+		operation="'stop' scripts"
 		RecordStart "$operation"
 		ProcessSysV stop
 		RecordEnd "$operation"
@@ -160,14 +176,14 @@ ProcessSysV()
 			# Execute 'init.d' script names in-order.
 
 			ls "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
-				[[ -x $script_pathname ]] && RunAndLog "'$script_pathname' start"
+				[[ -x $script_pathname ]] && RunAndLog "$script_pathname start"
 			done
 			;;
 		stop)
 			# Execute 'init.d' script names in reverse-order.
 
 			ls -r "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
-				[[ -x $script_pathname ]] && RunAndLog "'$script_pathname' stop"
+				[[ -x $script_pathname ]] && RunAndLog "$script_pathname stop"
 			done
 			;;
 		*)
@@ -184,7 +200,7 @@ ProcessScripts()
 	# Read 'scripts' script names in order and execute.
 
 	ls "$r_script_store_path"/* 2>/dev/null | while read -r script_pathname; do
-		[[ -x $script_pathname ]] && RunAndLog "'$script_pathname'"
+		[[ -x $script_pathname ]] && RunAndLog "$script_pathname"
 	done
 
 	}
@@ -214,8 +230,8 @@ ShowAsUsage()
 	{
 
 	echo -e "\nUsage: $0 {start|stop|restart|status}"
-	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path, then the 'scripts' path:\n\t$0 start"
-	echo -e "\nTo execute execute files in the $r_qpkg_name 'init.d' path in reverse order:\n\t$0 stop"
+	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path, then files in the 'scripts' path:\n\t$0 start"
+	echo -e "\nTo execute files in the $r_qpkg_name 'init.d' path in reverse order:\n\t$0 stop"
 	echo -e "\nTo stop, then start this QPKG:\n\t$0 restart"
 
 	}
@@ -226,21 +242,35 @@ RunAndLog()
 	# Inputs: (local)
 	#	$1 = command to run
 
+	# Inputs: (global)
+	#	$r_log_pathfile
+
 	if [[ -z ${1:-} ]]; then
 		echo 'command not specified'
 		return 1
 	fi
 
-	echo "[$(/bin/date)] -> execute: \"${1:-}\" ..." | /usr/bin/tee -a "$r_temp_log_pathfile"
+	local stdout=''
+	local stderr=''
 
-	{	# https://unix.stackexchange.com/a/430182/110015
-		stdout=$(eval "${1:-}" 2> /dev/fd/3)
+	FormatAsLog "-> execute: '$1' ..." | /usr/bin/tee -a "$r_log_pathfile"
+
+		{	# https://unix.stackexchange.com/a/430182/110015
+
+		stdout=$(eval "$1" 2> /dev/fd/3)
 		exitcode=$?
 		stderr=$(/bin/cat<&3)
-	} 3<<EOF
+
+		} 3<<EOF
 EOF
 
-	echo -e "[$(/bin/date)] => exitcode: ($exitcode)\n[$(/bin/date)] => stdout: \"$stdout\"\n[$(/bin/date)] => stderr: \"$stderr\"" | /usr/bin/tee -a "$r_temp_log_pathfile"
+		{
+
+		FormatAsLog "==> exitcode: '$exitcode'"
+		FormatAsLog "==> stdout: \"$stdout\""
+		FormatAsLog "==> stderr: \"$stderr\""
+
+		} | /usr/bin/tee -a "$r_log_pathfile"
 
 	return 0
 
@@ -288,36 +318,31 @@ GetConfigBlock()
 
 	}
 
-TrimGUILog()
-	{
-
-	local max_ops=10
-	local op_lines=$(/bin/grep -n "^──" "$r_real_log_pathfile")
-	local op_count=$(echo "$op_lines" | /usr/bin/wc -l)
-
-	if [[ $op_count -gt $max_ops ]]; then
-		local last_op_line_num=$(echo "$op_lines" | /usr/bin/head -n$((max_ops+1)) | /usr/bin/tail -n1 | /usr/bin/cut -f1 -d:)
-		/usr/bin/head -n"$last_op_line_num" "$r_real_log_pathfile" > "$r_temp_log_pathfile"
-		mv "$r_temp_log_pathfile" "$r_real_log_pathfile"
-	fi
-
-	}
-
 RecordStart()
 	{
 
 	# Inputs: (local)
 	#	$1 = operation
 
-	local op="begin ${1:-} ..."
-	local buffer="[$(/bin/date)] $op"
-	local length=${#buffer}
-	local temp=$(printf "%${length}s")
+	# Inputs: (global)
+	#	$r_qpkg_name
+	#	$r_qpkg_version
 
-	echo -e "${temp// /─}\n$r_qpkg_name ($r_qpkg_version)\n$buffer" > "$r_temp_log_pathfile"
+	[[ -n ${1:-} ]] || return
 
-	WriteQTSLog "$op" 0
-	echo "$buffer"
+	local a="begin processing $1 ..."
+
+	if [[ -s $r_log_pathfile ]]; then
+		local -i spacer_width=80
+		local b=''
+		printf -v b "%${spacer_width}s"
+		AppendToLog "${b// /─}"
+	fi
+
+	FormatAsLog "$a"
+	AppendToLog "$r_qpkg_name ($r_qpkg_version)"
+	AppendToLog "$a"
+	AppendToQTSLog "$a" 0
 
 	}
 
@@ -327,14 +352,14 @@ RecordEnd()
 	# Inputs: (local)
 	#	$1 = operation
 
-	local op="end ${1:-}"
-	local buffer="[$(/bin/date)] $op"
+	[[ -n ${1:-} ]] || return
 
-	echo -e "$buffer" >> "$r_temp_log_pathfile"
+	local a="end of processing $1"
 
-	WriteQTSLog "$op" 0
-	echo "$buffer"
-	CommitGUILog
+	FormatAsLog "$a"
+	AppendToLog "$a"
+	AppendToQTSLog "$a" 0
+
 	SetServiceResultAsOK
 
 	}
@@ -345,12 +370,10 @@ RecordInfo()
 	# Inputs: (local)
 	#	$1 = message
 
-	local buffer="[$(/bin/date)] ${1:-}"
+	[[ -n ${1:-} ]] || return
 
-	echo -e "$buffer" >> "$r_temp_log_pathfile"
-
-	WriteQTSLog "${1:-}" 0
-	echo "$buffer"
+	AppendToLog "$1"
+	AppendToQTSLog "$1" 0
 
 	}
 
@@ -360,51 +383,91 @@ RecordWarning()
 	# Inputs: (local)
 	#	$1 = message
 
-	local buffer="[$(/bin/date)] ${1:-}"
+	[[ -n ${1:-} ]] || return
 
-	echo -e "$buffer" >> "$r_temp_log_pathfile"
-
-	WriteQTSLog "${1:-}" 1
-	echo "$buffer"
+	AppendToLog "$1"
+	AppendToQTSLog "$1" 1
 
 	}
 
-# RecordError()
-#	{
-
-#	# $1 = message
-
-#	local buffer="[$(/bin/date)] ${1:-}"
-
-#	echo -e "$buffer" >> "$r_temp_log_pathfile"
-
-#	WriteQTSLog "${1:-}" 2
-#	echo "$buffer"
-
-#	}
-
-CommitGUILog()
+FormatAsLog()
 	{
 
-	echo -e "$(<"$r_temp_log_pathfile")\n$(<"$r_real_log_pathfile")" > "$r_real_log_pathfile"
+	[[ -n ${1:-} ]] || return
 
-	TrimGUILog
+	printf '%s - %s\n' "$(/bin/date)" "$1"
 
 	}
 
-WriteQTSLog()
+FormatAsQTSLog()
+	{
+
+	[[ -n ${1:-} ]] || return
+
+	printf '[%s] %s\n' "$r_qpkg_name" "$1"
+
+	}
+
+AppendToLog()
 	{
 
 	# Inputs: (local)
-	#	$1 = message to write into NAS system log
+	#	$1 = message to add to temporary log
+
+	[[ -n ${1:-} ]] || return
+
+	FormatAsLog "$1" >> "$r_log_pathfile"
+
+	}
+
+AppendToSleeperLog()
+	{
+
+	# Inputs: (local)
+	#	$1 = message to add to sleeper log
+
+	[[ -n ${1:-} ]] || return
+
+	FormatAsLog "$1" >> "$r_sleeper_log_pathfile"
+
+	}
+
+AppendToQTSLog()
+	{
+
+	# Inputs: (local)
+	#	$1 = message to add to NAS system log
 	#	$2 = event type:
 	#		0 : Information
 	#		1 : Warning
 	#		2 : Error
 
-	/sbin/log_tool --append "[$r_qpkg_name] ${1:-}" --type "${2:-}"
+	[[ -n ${1:-} && -n ${2:-} ]] || return
+
+	/sbin/log_tool --append "$(FormatAsQTSLog "$1")" --type "$2"
 
 	}
+
+WriteToSleeperLog()
+	{
+
+	# Inputs: (local)
+	#	$1 = message to write into sleeper log
+
+	[[ -n ${1:-} ]] || return
+
+	[[ -e $r_sleeper_log_pathfile ]] && rm "$r_sleeper_log_pathfile"
+
+	AppendToSleeperLog "$1"
+
+	}
+
+IsQuTS()
+	{
+
+	/bin/grep zfs /proc/filesystems
+
+	} &> /dev/null
 
 IsQPKGEnabled()
 	{
@@ -463,6 +526,20 @@ IsOsStartingPackages()
 	fi
 
 	} &> /dev/null
+
+GetOsName()
+	{
+
+	# Outputs: (local)
+	#	stdout = text string.
+
+	if IsQuTS; then
+		printf 'QuTS hero'
+	else
+		printf QTS
+	fi
+
+	}
 
 GetOsFirmwareVer()
 	{
@@ -593,7 +670,5 @@ case $user_arg in
 		ShowTitle
 		ShowAsUsage
 esac
-
-[[ -e $r_temp_log_pathfile ]] && rm -f "$r_temp_log_pathfile"
 
 exit 0
