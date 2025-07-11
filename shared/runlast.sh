@@ -240,7 +240,7 @@ ShowLog()
 	{
 
 	if [[ -e $r_log_pathfile ]]; then
-		/bin/less "$r_log_pathfile"
+		/bin/less -~ "$r_log_pathfile"
 	else
 		echo 'no log to display.'
 	fi

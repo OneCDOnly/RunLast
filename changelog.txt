@@ -1,4 +1,4 @@
-* Minor update: (250711)
+* Minor update: (250712)
 - code: include startup process timeout, improve log format, make log this-session-only, add arg to show log.
 
 * Minor update: (250708)
