@@ -1,3 +1,6 @@
+* Minor update: (250927)
+- code: update post-install func to include action and result.
+
 * Minor update: (250712)
 - code: include startup process timeout, improve log format, make log this-session-only, add arg to show log.
 
@@ -7,7 +10,7 @@
 * Minor update: (250707)
 - add support for QTS 5.2.0-and-later.
 - package: remove max version.
-- general code refresh.
+- code: general refresh.
 
 * Minor update: (241204)
 - package: set QTS 5.1.9 as max version.
@@ -17,7 +20,7 @@
 
 * Minor update: (240731)
 - update compatibility with sherpa package manager.
-- code refresh.
+- code: refresh.
 
 * Minor update: (230224)
 - update package icon.

@@ -132,4 +132,21 @@ pkg_post_install()
     $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME Scripts_Path $SYS_QPKG_DIR/scripts
     $CMD_SETCFG -f $SYS_QPKG_CONFIG_FILE $QPKG_NAME SysV_Path $SYS_QPKG_DIR/init.d
 
+	# If here, assume install/reinstall/upgrade worked OK. Reset service action.
+
+	readonly r_service_action_pathfile=/var/log/$QPKG_NAME.action
+	readonly r_service_result_pathfile=/var/log/$QPKG_NAME.result
+	local service_result=ok
+
+	if [[ ${REINSTALL_QPKG:=false} = true ]]; then
+		service_action=reinstall
+	elif [[ ${UPGRADE_QPKG:=false} = true ]]; then
+		service_action=upgrade
+	else
+		service_action=install
+	fi
+
+	echo "$service_action" > "$r_service_action_pathfile"
+	echo "$service_result" > "$r_service_result_pathfile"
+
     }
