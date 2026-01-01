@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###############################################################################
 # runlast.sh
-#	Copyright 2019-2025 OneCD
+#	Copyright 2019-2026 OneCD
 #
 # Contact:
 #	one.cd.only@gmail.com
@@ -37,7 +37,7 @@
 
 set -o nounset -o pipefail
 shopt -s extglob
-ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
+[[ -L /dev/fd ]] || ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
 readonly r_user_args_raw=$*
 
 Init()
@@ -175,14 +175,14 @@ ProcessSysV()
 		start)
 			# Execute 'init.d' script names in-order.
 
-			ls "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
+			ls "$r_sysv_store_path"/* 2> /dev/null | while read -r script_pathname; do
 				[[ -x $script_pathname ]] && RunAndLog "$script_pathname start"
 			done
 			;;
 		stop)
 			# Execute 'init.d' script names in reverse-order.
 
-			ls -r "$r_sysv_store_path"/* 2>/dev/null | while read -r script_pathname; do
+			ls -r "$r_sysv_store_path"/* 2> /dev/null | while read -r script_pathname; do
 				[[ -x $script_pathname ]] && RunAndLog "$script_pathname stop"
 			done
 			;;
@@ -199,7 +199,7 @@ ProcessScripts()
 
 	# Read 'scripts' script names in order and execute.
 
-	ls "$r_script_store_path"/* 2>/dev/null | while read -r script_pathname; do
+	ls "$r_script_store_path"/* 2> /dev/null | while read -r script_pathname; do
 		[[ -x $script_pathname ]] && RunAndLog "$script_pathname"
 	done
 
@@ -316,11 +316,11 @@ GetConfigBlock()
 	local -i tl=0		# total lines in config block.
 	local -i el=0		# end line number of config block.
 
-	sl=$(/bin/grep -n "^\[${1:-}\]" /etc/config/qpkg.conf | /usr/bin/cut -f1 -d':')
+	sl=$(/bin/grep -n "^\[${1:-}\]" /etc/config/qpkg.conf | cut -f1 -d':')
 	[[ -n $sl ]] || return
 
-	ll=$(/usr/bin/wc -l < /etc/config/qpkg.conf | /bin/tr -d ' ')
-	tl=$(/usr/bin/tail -n$((ll-sl)) < /etc/config/qpkg.conf | /bin/grep -n '^\[' | /usr/bin/head -n1 | /usr/bin/cut -f1 -d':')
+	ll=$(wc -l < /etc/config/qpkg.conf | tr -d ' ')
+	tl=$(tail -n$((ll-sl)) < /etc/config/qpkg.conf | /bin/grep -n '^\[' | head -n1 | cut -f1 -d':')
 
 	[[ $tl -ne 0 ]] && el=$((sl+tl-1)) || el=$ll
 	[[ -n $el ]] || return
@@ -561,7 +561,7 @@ GetOsFirmwareVer()
 	#	stdout = integer.
 	#	$? = 0 if found, 250 if not.
 
-	/sbin/getcfg System Version -d undefined -f /etc/config/uLinux.conf | /bin/tr -d '.'
+	/sbin/getcfg System Version -d undefined -f /etc/config/uLinux.conf | tr -d '.'
 
 	}
 
@@ -638,7 +638,7 @@ TextBrightWhite()
 Lowercase()
 	{
 
-	/bin/tr 'A-Z' 'a-z' <<< "${1:-}"
+	tr 'A-Z' 'a-z' <<< "${1:-}"
 
 	}
 

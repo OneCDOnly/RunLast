@@ -1,3 +1,6 @@
+* Minor update: (260102)
+- code: minor tweaks.
+
 * Minor update: (250927)
 - code: update post-install func to include action and result.
 
