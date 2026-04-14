@@ -35,7 +35,7 @@
 # this program. If not, see http://www.gnu.org/licenses/.
 ###############################################################################
 
-set -o nounset -o pipefail
+set -o nounset
 shopt -s extglob
 [[ -L /dev/fd ]] || ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
 readonly r_user_args_raw=$*
